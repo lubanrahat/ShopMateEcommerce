@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import fileUpload from "express-fileupload";
+import { createTables } from "./utils/createTables.js";
 
 dotenv.config({ path: "./.env" });
 
@@ -22,5 +23,7 @@ app.use(
     useTempFiles: true,
   })
 );
+
+createTables()
 
 export default app;
