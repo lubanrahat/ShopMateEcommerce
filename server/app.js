@@ -1,9 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import { createTables } from "./utils/createTables.js";
 import { errorMiddleware } from "./middlewares/errorMiddleware.js";
+import authRoutes from "./routes/auth.routes.js";
 
 dotenv.config({ path: "./.env" });
 
@@ -17,6 +19,7 @@ app.use(
   })
 );
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -25,6 +28,8 @@ app.use(
     useTempFiles: true,
   })
 );
+
+app.use("/api/v1/auth", authRoutes);
 
 createTables();
 app.use(errorMiddleware);
