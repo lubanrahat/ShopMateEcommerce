@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import fileUpload from "express-fileupload";
 import { createTables } from "./utils/createTables.js";
+import { errorMiddleware } from "./middlewares/errorMiddleware.js";
 
 dotenv.config({ path: "./.env" });
 
@@ -15,6 +16,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -24,6 +26,7 @@ app.use(
   })
 );
 
-createTables()
+createTables();
+app.use(errorMiddleware);
 
 export default app;

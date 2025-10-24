@@ -16,7 +16,7 @@ export async function createUserTable() {
       );
     `;
     await database.query(query);
-    console.log("✅User table created successfully.");
+    console.log("✅ User table created successfully.");
   } catch (error) {
     console.error("❌Error creating user table:", error);
   }
