@@ -3,6 +3,9 @@ import { catchAsyncErrors } from "../middlewares/catchAsyncError.js";
 import database from "../database/db.js";
 import bcrypt from "bcryptjs";
 import { sendToken } from "../utils/jwtToken.js";
+import { generateResetPasswordToken } from "../utils/generateResetPasswordToken.js";
+import { generateEmailTemplate } from "../utils/generateForgotPasswordEmailTemplate.js";
+import { sendMaile } from "../utils/sendMail.js";
 
 const register = catchAsyncErrors(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -68,4 +71,65 @@ const logout = catchAsyncErrors(async (req, res, next) => {
     });
 });
 
-export { register, login, getUser, logout };
+const forgotPassword = catchAsyncErrors(async (req, res, next) => {
+  const { email } = req.body;
+  const { frontndUrl } = req.query;
+  let userResult = await database.query(
+    "SELECT * FROM users WHERE email = $1",
+    [email]
+  );
+  if (userResult.rows.length === 0) {
+    return next(new ErrorHandler("User not found with this email", 404));
+  }
+  const user = userResult.rows[0];
+  const { resetToken, hashedToken, resetPasswordExpireTime } =
+    generateResetPasswordToken();
+
+  await database.query(
+    `UPDATE users 
+   SET reset_password_token = $1, 
+       reset_password_expire = to_timestamp($2) 
+   WHERE email = $3`,
+    [hashedToken, resetPasswordExpireTime / 1000, email]
+  );
+
+  const resetPasswordUrl = `${frontndUrl}/password/reset/${resetToken}`;
+
+  const message = generateEmailTemplate(resetPasswordUrl);
+
+  try {
+    await sendMaile({
+      email: user.email,
+      subject: "Ecommerce Password Recovery",
+      message,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Email sent to ${user.email} successfully`,
+    });
+  } catch (error) {
+    await database.query(
+      `UPDATE users 
+     SET reset_password_token = NULL, 
+         reset_password_expire = NULL 
+     WHERE email = $1`,
+      [user.email]
+    );
+
+    console.error("Failed to send email:", error.message);
+
+    return next(
+      new ErrorHandler(
+        "Failed to send password recovery email. Please try again later.",
+        500
+      )
+    );
+  }
+});
+
+
+
+
+
+export { register, login, getUser, logout, forgotPassword };
