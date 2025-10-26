@@ -8,6 +8,7 @@ import {
   deleteProduct,
   fetchAllProducts,
   fetchSingleProduct,
+  postProductReview,
   updateProduct,
 } from "../controllers/product.controller.js";
 
@@ -42,5 +43,7 @@ router.get(
   authorizedRoles("Admin"),
   fetchSingleProduct
 );
+
+router.put("/post-new/review/:productId", isAuthenticated, postProductReview);
 
 export default router;
