@@ -12,16 +12,23 @@ export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-  const user = await database.query(
+  const result = await database.query(
     "SELECT * FROM users WHERE id = $1 LIMIT 1",
     [decoded.id]
   );
 
-  if (user.rows.length === 0) {
+  if (result.rows.length === 0) {
     return next(new ErrorHandler("User not found", 404));
   }
 
-  req.user = user.rows[0];
+  const user = result.rows[0];
+  if (!user.password) {
+    console.warn(
+      "⚠️ Warning: password field not found in database query result"
+    );
+  }
+
+  req.user = user;
   next();
 });
 
