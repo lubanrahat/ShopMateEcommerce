@@ -17,12 +17,14 @@ router.get(
   authorizedRoles("Admin"),
   getAllUser
 );
+
 router.delete(
   "/delete/:id",
   isAuthenticated,
   authorizedRoles("Admin"),
   deleteUser
 );
+
 router.get(
   "/fetch/dashboard-stats",
   isAuthenticated,
