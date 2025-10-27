@@ -7,6 +7,7 @@ import {
   createProduct,
   deleteProduct,
   deleteReview,
+  fetchAIFilteredProducts,
   fetchAllProducts,
   fetchSingleProduct,
   postProductReview,
@@ -48,5 +49,7 @@ router.get(
 router.put("/post-new/review/:productId", isAuthenticated, postProductReview);
 
 router.delete("/delete/review/:productId", isAuthenticated, deleteReview);
+
+router.post("/api-search", isAuthenticated, fetchAIFilteredProducts);
 
 export default router;
